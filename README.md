@@ -13,19 +13,11 @@ CLI tool to summarize documents and books with AI.
 
 ## Installation
 
-Clone with submodule:
-
 ```bash
 git clone --recursive git@github.com:fabiogaliano/docs-summarizer.git
-cd book-summarizer
+cd docs-summarizer
 bun install
-```
-
-Or if already cloned:
-
-```bash
-git submodule update --init --recursive
-bun install
+bun run setup
 ```
 
 ## Usage
@@ -117,9 +109,9 @@ Prefers starting from:
 
 ## Requirements
 
-- Bun runtime
-- Claude CLI configured and available in PATH
-- `epub-chapter-splitter` as a git submodule (see Installation)
+- [Bun](https://bun.sh) runtime
+- [Rust](https://rustup.rs) toolchain (to build epub-chapter-splitter)
+- [Claude CLI](https://docs.anthropic.com/en/docs/claude-code) configured and available in PATH
 
 ## Future
 
