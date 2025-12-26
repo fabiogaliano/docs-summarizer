@@ -1,0 +1,16 @@
+{
+  "name": "docs-summarizer",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/prompts": "^2.4.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2"
+  }
+}

@@ -1,0 +1,22 @@
+Create a comprehensive 1500-2000 word summary of this book based on the chapter summaries provided.
+
+Book: {{TITLE}} by {{AUTHOR}}
+Chapters: {{CHAPTER_COUNT}}
+
+Guidelines:
+- Synthesize the main themes and connect ideas across chapters
+- Include the most compelling examples and case studies
+- Present practical takeaways and actionable insights
+- Capture the author's voice and perspective where relevant
+- Structure with clear sections (don't just recap chapter-by-chapter)
+- Use engaging, accessible language
+- Write in English
+
+Suggested structure:
+1. Core Premise (what's the book's main argument?)
+2. Key Concepts (the major ideas explored)
+3. Notable Examples (the best stories/cases that illustrate points)
+4. Practical Applications (what can readers do with this?)
+5. Final Takeaway (the lasting insight)
+
+The chapter summaries follow:

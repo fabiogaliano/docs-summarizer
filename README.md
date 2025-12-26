@@ -1,0 +1,121 @@
+# docs-summarizer
+
+AI-powered document and book summarizer. Splits EPUB files into chapters, summarizes each one, then combines them into a cohesive summary.
+
+## Features
+
+- Auto-detect and skip front/back matter (covers, dedications, etc.)
+- Two summary modes: concise (quick overview) or detailed (with examples)
+- Interactive chapter selection with `-i` flag
+- Modular provider architecture (Claude CLI by default, extensible for other APIs)
+- Progress tracking with chapter-by-chapter logging
+- Outputs both individual chapter summaries and complete book summaries
+
+## Installation
+
+```bash
+cd book-summarizer
+bun install
+```
+
+## Usage
+
+```bash
+# Summarize a single EPUB
+bun run src/index.ts ./book.epub
+
+# Summarize all EPUBs in a folder
+bun run src/index.ts ./books/
+
+# Interactive mode - select chapters manually
+bun run src/index.ts ./book.epub -i
+
+# Specify output directory
+bun run src/index.ts ./book.epub -o ./output/
+
+# Detailed mode with examples
+bun run src/index.ts ./book.epub -m detailed
+
+# Use a different model
+bun run src/index.ts ./book.epub --model sonnet
+
+# Skip if already summarized
+bun run src/index.ts ./books/ --skip-existing
+```
+
+## Options
+
+```
+-o, --output <dir>     Output directory (default: same as epub)
+-m, --mode <mode>      Summary mode: concise (default) or detailed
+--provider <provider>  AI provider: claude-cli (default)
+--model <model>        Model to use (default: haiku)
+--skip-existing        Skip if summaries already exist
+-i, --interactive      Interactively select chapters to summarize
+-h, --help             Show this help
+```
+
+## Output Structure
+
+```
+{book-name}/
+├── book.json                 # Manifest from epub-splitter
+├── chapters/                 # Raw markdown chapters
+├── summaries/
+│   ├── concise/
+│   │   ├── 01_introduction.md
+│   │   ├── 02_chapter_1.md
+│   │   └── ...
+│   └── detailed/
+│       ├── 01_introduction.md
+│       └── ...
+├── summary-concise.md        # Quick book overview
+└── summary-detailed.md       # Rich book summary
+```
+
+## Architecture
+
+### Layers
+
+- **EPUB Processing**: Handles file splitting and chapter detection
+- **Providers**: Pluggable AI backends (Claude CLI, future: OpenAI, Anthropic API)
+- **Summarizers**: Chapter and book-level summarization logic
+- **UI**: Interactive chapter selection with `prompts` library
+- **Output**: File writing and formatting
+
+### Smart Chapter Detection
+
+Automatically skips:
+- Front matter (covers, dedications, tables of contents)
+- Back matter (indexes, bibliography, acknowledgments)
+
+Prefers starting from:
+1. "Introduction" chapter
+2. First preface/prologue/foreword
+3. After last front matter section
+
+### Summary Modes
+
+**Concise** (~200-300 words per chapter):
+- Key points only
+- Quick overview suitable for rapid reading
+
+**Detailed** (~500-800 words per chapter):
+- Includes notable examples and case studies
+- Practical takeaways for non-fiction
+- Better context preservation
+
+## Requirements
+
+- Bun runtime
+- Claude CLI configured and available in PATH
+- `epub-splitter` binary at `../epub-splitter/target/release/epub-splitter`
+
+## Future
+
+- PDF support
+- DOCX support
+- Additional AI providers (OpenAI, Anthropic API, Ollama)
+- Batch processing with progress reporting
+- Custom prompt templates
+- Highlight extraction

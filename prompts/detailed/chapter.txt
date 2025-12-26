@@ -1,0 +1,12 @@
+Summarize this chapter in 500-800 words with depth and practical value.
+
+Guidelines:
+- Extract the main argument or thesis
+- Include 3-5 key takeaways with context
+- For non-fiction: include notable examples, case studies, or research cited
+- For practical advice: include specific actionable steps
+- Preserve important quotes if they capture key ideas
+- Use clear, engaging language
+- Write in English
+
+The chapter is titled: {{TITLE}}

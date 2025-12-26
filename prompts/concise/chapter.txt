@@ -1,0 +1,10 @@
+Summarize this chapter in 200-300 words. Be direct and focus on the key points.
+
+Guidelines:
+- Extract the main argument or thesis
+- List 2-3 key takeaways
+- Use clear, simple language
+- No fluff or filler words
+- Write in English
+
+The chapter is titled: {{TITLE}}
