@@ -1,0 +1,3 @@
+[submodule "epub-chapter-splitter"]
+	path = epub-chapter-splitter
+	url = git@github.com:fabiogaliano/epub-chapter-splitter.git

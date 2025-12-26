@@ -32,10 +32,10 @@ export const MIN_CONTENT_WORDS = 100;
 // Default model
 export const DEFAULT_MODEL = 'haiku';
 
-// Path to epub-splitter binary
+// Path to epub-chapter-splitter binary
 export const EPUB_SPLITTER_PATH = join(
   dirname(dirname(import.meta.dir)),
-  'epub-splitter/target/release/epub-splitter'
+  'epub-chapter-splitter/target/release/epub-splitter'
 );
 
 // Prompts directory

@@ -1,6 +1,6 @@
 # docs-summarizer
 
-AI-powered document and book summarizer. Splits EPUB files into chapters, summarizes each one, then combines them into a cohesive summary.
+CLI tool to summarize documents and books with AI.
 
 ## Features
 
@@ -13,8 +13,18 @@ AI-powered document and book summarizer. Splits EPUB files into chapters, summar
 
 ## Installation
 
+Clone with submodule:
+
 ```bash
+git clone --recursive git@github.com:fabiogaliano/docs-summarizer.git
 cd book-summarizer
+bun install
+```
+
+Or if already cloned:
+
+```bash
+git submodule update --init --recursive
 bun install
 ```
 
@@ -109,7 +119,7 @@ Prefers starting from:
 
 - Bun runtime
 - Claude CLI configured and available in PATH
-- `epub-splitter` binary at `../epub-splitter/target/release/epub-splitter`
+- `epub-chapter-splitter` as a git submodule (see Installation)
 
 ## Future
 
