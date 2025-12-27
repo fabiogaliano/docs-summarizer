@@ -25,7 +25,7 @@ export class ChapterSummarizer {
   }
 
   async summarize(chapter: Chapter): Promise<ChapterSummary> {
-    const config = await getModeConfig(this.mode);
+    const config = getModeConfig(this.mode);
 
     const prompt = config.chapterPrompt
       .replace('{{TITLE}}', chapter.info.title)
@@ -53,10 +53,24 @@ export class ChapterSummarizer {
 
     for (let i = 0; i < chapters.length; i++) {
       const chapter = chapters[i];
+      if (!chapter) continue;
+
+      // Skip very short chapters without API call (likely non-content)
+      if (chapter.info.word_count < 50) {
+        continue;
+      }
+
       onProgress?.(i + 1, chapters.length, chapter.info.title);
 
-      const summary = await this.summarize(chapter);
-      summaries.push(summary);
+      const result = await this.summarize(chapter);
+
+      // Skip chapters that return SKIP (non-content like copyright, author bio, etc.)
+      const summaryStart = result.summary.trim().toUpperCase();
+      if (summaryStart === 'SKIP' || summaryStart.startsWith('SKIP\n') || summaryStart.startsWith('SKIP ')) {
+        continue;
+      }
+
+      summaries.push(result);
     }
 
     return summaries;

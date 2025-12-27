@@ -30,7 +30,7 @@ export class BookSummarizer {
     bookTitle: string,
     bookAuthor: string
   ): Promise<BookSummary> {
-    const config = await getModeConfig(this.mode);
+    const config = getModeConfig(this.mode);
 
     // Combine chapter summaries with headers
     const combinedSummaries = chapterSummaries

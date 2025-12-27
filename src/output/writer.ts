@@ -52,6 +52,31 @@ export class OutputWriter {
     return filepath;
   }
 
+  async writeCombinedSummary(
+    chapterSummaries: ChapterSummary[],
+    bookTitle: string,
+    bookAuthor: string,
+    bookSummary: BookSummary | null = null
+  ): Promise<string> {
+    const filename = `${this.slugify(bookTitle)}-summary-${this.mode}.md`;
+    const filepath = join(this.baseDir, filename);
+
+    let content = `# ${bookTitle}\n\n`;
+    content += `*By ${bookAuthor}*\n\n`;
+
+    if (bookSummary) {
+      content += `## Overview\n\n${bookSummary.summary}\n\n`;
+      content += `---\n\n## Chapter Summaries\n\n`;
+    }
+
+    for (const chapter of chapterSummaries) {
+      content += `## ${chapter.title}\n\n${chapter.summary}\n\n`;
+    }
+
+    await Bun.write(filepath, content);
+    return filepath;
+  }
+
   private slugify(title: string): string {
     return title
       .toLowerCase()

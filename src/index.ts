@@ -1,6 +1,6 @@
 import { resolve, join, basename } from 'path';
-import { readdir, stat } from 'fs/promises';
-import type { SummarizeOptions, SummaryMode, ProviderType, Chapter, ChapterInfo } from './types';
+import { readdir, stat, rm, unlink } from 'fs/promises';
+import type { SummarizeOptions, SummaryMode, ProviderType, Chapter, ChapterInfo, AppConfig } from './types';
 import { EpubProcessor } from './epub/processor';
 import { getContentChapters } from './epub/chapter-finder';
 import { createProvider } from './providers';
@@ -8,10 +8,10 @@ import { createUI } from './ui';
 import { ChapterSummarizer } from './summarizer/chapter-summarizer';
 import { BookSummarizer } from './summarizer/book-summarizer';
 import { OutputWriter } from './output/writer';
-import { DEFAULT_MODEL } from './config';
+import { loadConfig, getConfig } from './config';
 
-// Parse CLI arguments
-function parseArgs(): SummarizeOptions | null {
+// Parse CLI arguments (config provides defaults)
+function parseArgs(config: AppConfig): SummarizeOptions | null {
   const args = Bun.argv.slice(2);
 
   if (args.length === 0 || args[0] === 'help' || args[0] === '--help' || args[0] === '-h') {
@@ -20,7 +20,7 @@ function parseArgs(): SummarizeOptions | null {
   }
 
   // First arg should be 'summarize' command or a path
-  let pathArg: string;
+  let pathArg: string | undefined;
   let restArgs: string[];
 
   if (args[0] === 'summarize') {
@@ -38,16 +38,19 @@ function parseArgs(): SummarizeOptions | null {
     return null;
   }
 
+  // Start with config defaults
   const options: SummarizeOptions = {
     path: resolve(pathArg),
-    mode: 'concise',
-    provider: 'claude-cli',
-    model: DEFAULT_MODEL,
+    mode: config.defaults.mode,
+    provider: config.defaults.provider,
+    model: config.defaults.model,
+    singleFile: config.defaults.singleFile,
+    includeOverview: config.defaults.includeOverview,
     skipExisting: false,
     interactive: false,
   };
 
-  // Parse remaining args
+  // Parse remaining args (CLI flags override config defaults)
   for (let i = 0; i < restArgs.length; i++) {
     const arg = restArgs[i];
     const next = restArgs[i + 1];
@@ -84,6 +87,12 @@ function parseArgs(): SummarizeOptions | null {
       case '--interactive':
         options.interactive = true;
         break;
+      case '--single-file':
+        options.singleFile = true;
+        break;
+      case '--overview':
+        options.includeOverview = true;
+        break;
     }
   }
 
@@ -100,18 +109,22 @@ Usage:
 
 Options:
   -o, --output <dir>     Output directory (default: same as epub)
-  -m, --mode <mode>      Summary mode: concise (default) or detailed
+  -m, --mode <mode>      Summary mode: concise or detailed
   --provider <provider>  AI provider: claude-cli (default)
-  --model <model>        Model to use (default: haiku)
+  --model <model>        Model to use
+  --single-file          Output everything to a single combined file
+  --overview             Include book-level synthesis (off by default)
   --skip-existing        Skip if summaries already exist
   -i, --interactive      Interactively select chapters to summarize
   -h, --help             Show this help
 
+Defaults are loaded from config.yaml
+
 Examples:
   bun run src/index.ts ./book.epub
   bun run src/index.ts ./books/ --mode detailed
+  bun run src/index.ts ./book.epub --single-file   # Single combined output
   bun run src/index.ts ./book.epub -i              # Interactive chapter selection
-  bun run src/index.ts ./book.epub -m concise --model sonnet
 `);
 }
 
@@ -199,27 +212,45 @@ async function summarizeBook(
     }
   );
 
-  // Write chapter summaries
-  await writer.writeChapterSummaries(chapterSummaries);
-
-  // Create book summary
-  console.log('  Creating book summary...');
   const bookTitle = manifest.title ?? bookName;
   const bookAuthor = manifest.author ?? 'Unknown';
-  const bookSummary = await bookSummarizer.summarize(
-    chapterSummaries,
-    bookTitle,
-    bookAuthor
-  );
 
-  // Write book summary
-  const summaryPath = await writer.writeBookSummary(bookSummary);
+  // Create book overview (optional)
+  let bookSummary = null;
+  if (options.includeOverview) {
+    console.log('  Creating book overview...');
+    bookSummary = await bookSummarizer.summarize(
+      chapterSummaries,
+      bookTitle,
+      bookAuthor
+    );
+  }
+
+  // Write output
+  let summaryPath: string;
+  if (options.singleFile) {
+    summaryPath = await writer.writeCombinedSummary(chapterSummaries, bookTitle, bookAuthor, bookSummary);
+  } else {
+    await writer.writeChapterSummaries(chapterSummaries);
+    if (bookSummary) {
+      summaryPath = await writer.writeBookSummary(bookSummary);
+    } else {
+      summaryPath = join(outputDir, `summaries/${options.mode}`);
+    }
+  }
+
+  // Cleanup epub-splitter artifacts
+  await rm(join(outputDir, 'chapters'), { recursive: true, force: true });
+  await unlink(join(outputDir, 'book.json')).catch(() => {});
 
   console.log(`  Done! Summary: ${summaryPath}`);
 }
 
 async function main(): Promise<void> {
-  const options = parseArgs();
+  // Load config first
+  const config = await loadConfig();
+
+  const options = parseArgs(config);
   if (!options) {
     process.exit(0);
   }
@@ -233,7 +264,7 @@ async function main(): Promise<void> {
     }
 
     console.log(`Found ${epubFiles.length} book(s) to summarize`);
-    console.log(`Mode: ${options.mode} | Provider: ${options.provider} | Model: ${options.model}`);
+    console.log(`Mode: ${options.mode} | Model: ${options.model} | Output: ${options.singleFile ? 'single file' : 'folder'}`);
 
     for (const epubPath of epubFiles) {
       await summarizeBook(epubPath, options);

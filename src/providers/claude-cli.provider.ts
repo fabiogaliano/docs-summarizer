@@ -1,6 +1,6 @@
 import type { SummaryProvider } from './types';
 import type { ProviderOptions } from '../types';
-import { DEFAULT_MODEL } from '../config';
+import { getDefaultModel } from '../config';
 
 export class ClaudeCLIProvider implements SummaryProvider {
   name = 'claude-cli';
@@ -10,7 +10,7 @@ export class ClaudeCLIProvider implements SummaryProvider {
     prompt: string,
     options?: ProviderOptions
   ): Promise<string> {
-    const model = options?.model ?? DEFAULT_MODEL;
+    const model = options?.model ?? getDefaultModel();
 
     const proc = Bun.spawn(
       ['claude', '-p', '--model', model, prompt],

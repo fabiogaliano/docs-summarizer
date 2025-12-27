@@ -1,0 +1,55 @@
+# Default execution settings (can be overridden by CLI flags)
+defaults:
+  mode: detailed         # concise | detailed
+  model: haiku           # haiku | sonnet | opus
+  provider: claude-cli
+  singleFile: true       # true = combined output, false = folder structure
+  includeOverview: false # true = add book-level synthesis, false = chapters only
+
+# Prompts for each mode
+prompts:
+  concise:
+    chapter: |
+      Summarize this chapter in 150-250 words.
+
+      CRITICAL: Start directly with content. No titles, headers, or "Summary:" prefix.
+
+      If non-content (copyright, author bio, acknowledgments, empty), respond: SKIP
+
+      Include main argument and 2-3 key takeaways. Be direct.
+
+      Chapter: {{TITLE}}
+
+    book: |
+      Write a 400-600 word summary of this book.
+
+      CRITICAL: Start directly with content. No title or headers like "# Book Title".
+
+      Synthesize main themes. Present unified narrative, not chapter-by-chapter recap.
+
+      Book: {{TITLE}} by {{AUTHOR}}
+
+      Chapter summaries follow:
+
+  detailed:
+    chapter: |
+      Summarize this chapter in 400-600 words.
+
+      CRITICAL: Start directly with content. No titles, headers, or "Summary:" prefix.
+
+      If non-content (copyright, author bio, acknowledgments, empty), respond: SKIP
+
+      Include main argument, 3-4 key takeaways with context, notable examples or research, and actionable steps if applicable.
+
+      Chapter: {{TITLE}}
+
+    book: |
+      Write a 1200-1600 word summary of this book.
+
+      CRITICAL: Start directly with content. No title or headers like "# Book Title".
+
+      Synthesize main themes across chapters. Include compelling examples. Present practical takeaways. Use ## headers for sections.
+
+      Book: {{TITLE}} by {{AUTHOR}}
+
+      Chapter summaries follow:

@@ -30,7 +30,9 @@ export function findContentStart(chapters: ChapterInfo[]): number {
   // Priority 3: Find last front matter, start after it
   let lastFrontMatterIndex = -1;
   for (let i = 0; i < chapters.length; i++) {
-    const title = normalize(chapters[i].title);
+    const chapter = chapters[i];
+    if (!chapter) continue;
+    const title = normalize(chapter.title);
     if (FRONT_MATTER.some(term => title.includes(term))) {
       lastFrontMatterIndex = i;
     } else if (lastFrontMatterIndex !== -1) {
@@ -44,7 +46,8 @@ export function findContentStart(chapters: ChapterInfo[]): number {
 
   // Priority 4: Skip low word-count chapters at start
   for (let i = 0; i < chapters.length; i++) {
-    if (chapters[i].word_count >= MIN_CONTENT_WORDS) {
+    const chapter = chapters[i];
+    if (chapter && chapter.word_count >= MIN_CONTENT_WORDS) {
       return i;
     }
   }
@@ -60,22 +63,35 @@ export function findContentStart(chapters: ChapterInfo[]): number {
 export function findContentEnd(chapters: ChapterInfo[]): number {
   const backMatterTerms = [
     'notes',
+    'endnotes',
+    'footnotes',
     'bibliography',
     'index',
     'about the author',
+    'about the authors',
     'acknowledgments',
     'acknowledgements',
     'appendix',
     'references',
     'further reading',
+    'copyright',
+    'colophon',
+    'credits',
+    'also by',
+    'other books',
+    'books by',
+    'resources',
+    'glossary',
   ];
 
   // Work backwards to find first back matter
   for (let i = chapters.length - 1; i >= 0; i--) {
-    const title = normalize(chapters[i].title);
+    const chapter = chapters[i];
+    if (!chapter) continue;
+    const title = normalize(chapter.title);
     const isBackMatter = backMatterTerms.some(term => title.includes(term));
 
-    if (!isBackMatter && chapters[i].word_count >= MIN_CONTENT_WORDS) {
+    if (!isBackMatter && chapter.word_count >= MIN_CONTENT_WORDS) {
       return i;
     }
   }

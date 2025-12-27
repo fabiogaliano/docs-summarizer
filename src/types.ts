@@ -38,4 +38,21 @@ export interface SummarizeOptions {
   model: string;
   skipExisting: boolean;
   interactive: boolean;
+  singleFile: boolean;
+  includeOverview: boolean;
+}
+
+// App configuration from config.yaml
+export interface AppConfig {
+  defaults: {
+    mode: SummaryMode;
+    model: string;
+    provider: ProviderType;
+    singleFile: boolean;
+    includeOverview: boolean;
+  };
+  prompts: {
+    concise: { chapter: string; book: string };
+    detailed: { chapter: string; book: string };
+  };
 }

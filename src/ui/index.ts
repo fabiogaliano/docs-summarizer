@@ -24,7 +24,9 @@ class HeadlessUI implements UIProvider {
 
   async selectOne<T>(_message: string, choices: Choice<T>[]): Promise<T> {
     // Return first choice as default
-    return choices[0].value;
+    const first = choices[0];
+    if (!first) throw new Error('No choices provided');
+    return first.value;
   }
 }
 
